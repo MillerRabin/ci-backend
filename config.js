@@ -5,6 +5,15 @@ const productionSettings = {
     ssl: {
         key: '/etc/letsencrypt/live/ci.raintech.su/privkey.pem',
         cert: '/etc/letsencrypt/live/ci.raintech.su/fullchain.pem'
+    },
+    pool : {
+        host: 'localhost',
+        user: 'master',
+        database: 'ci',
+        port: 5438,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 60000
     }
 };
 

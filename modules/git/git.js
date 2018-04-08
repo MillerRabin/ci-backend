@@ -8,6 +8,7 @@ exports.addController = (application, controllerName) => {
 
     router.post('/' + controllerName, koaBody(), async (ctx) => {
         const data = ctx.request.body;
+        console.log(data);
         return { success: 'true'};
     });
 
