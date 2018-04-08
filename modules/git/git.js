@@ -6,7 +6,7 @@ const response = require('../../middlewares/response.js');
 exports.addController = (application, controllerName) => {
     const router = new Router();
 
-    router.post('/' + controllerName, koaBody(), async (ctx) => {
+    router.post('/' + controllerName + '/bitbucket', koaBody(), async (ctx) => {
         const data = ctx.request.body;
         console.log(data);
         return { success: 'true'};
