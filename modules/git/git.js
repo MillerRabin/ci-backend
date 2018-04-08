@@ -37,7 +37,7 @@ function parseBitbucketStructure(data) {
     if (push == null) return null;
     const changes = push.changes;
     if (changes == null) throw new response.Error({ changes: 'Invalid changes structure'});
-    const newChanges = changes.new;
+    const newChanges = changes['new'];
     if (newChanges == null) throw new response.Error({ 'changes.new': 'Invalid changes new structure'});
     const branchName = newChanges.name;
     if (branchName == null) throw new response.Error({ branch: 'Invalid branch name'});
