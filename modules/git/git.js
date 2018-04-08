@@ -50,7 +50,6 @@ async function deployProject(connection, data) {
     const obj = parseBitbucketStructure(data);
     if (obj == null) return null;
     const pdata = await getProject(connection, obj);
-    console.log(pdata);
     return { success: true };
 }
 
@@ -64,6 +63,7 @@ exports.addController = (application, controllerName) => {
             try {
                 const deployResult = await deployProject(connection, data);
                 await logGit({ connection, data, deployResult });
+                return deployResult;
             } catch (e) {
                 await logGit({ connection, data, error: e });
                 throw e;

@@ -28,4 +28,4 @@ values ('ci-backend', 'production', '[ "cd /usr/raintech/ci", "git clone git@bit
 '{ "host": "ci.raintech.su", "user": "ci", "password": "ifyouwanttohave"}'
 )
 
-select * from git_logs;
+select * from git_logs order by event_time desc;
