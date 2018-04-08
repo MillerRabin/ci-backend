@@ -25,7 +25,7 @@ async function getProject(connection, data) {
         'limit 1'
     ];
     const pdata = await connection.query(getQuery.join(' '), params);
-    if (pdata.length == 0) return null;
+    if (pdata.rows.length == 0) return null;
     return pdata.rows[0];
 }
 
@@ -51,6 +51,7 @@ async function deployProject(connection, data) {
     const obj = parseBitbucketStructure(data);
     if (obj == null) return null;
     const pdata = await getProject(connection, obj);
+    if (pdata == null) return { text: 'No project to deploy' };
     return await deploy.start(pdata);
 }
 
