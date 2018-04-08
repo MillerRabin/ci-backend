@@ -3,7 +3,7 @@ const koaBody = require('koa-body');
 const response = require('../../middlewares/response.js');
 
 async function logGit(pobj) {
-    const addQuery = 'insert into git_logs (event_data, deploy_result, error) values($1, $2, $3)';
+    const addQuery = 'insert into git_logs (event_data, deploy_results, error) values($1, $2, $3)';
     const params = [
         pobj.data,
         (pobj.deployResult == null) ? null : pobj.deployResult,
