@@ -23,7 +23,7 @@ async function getProject(connection, data) {
         (where.length > 0) ? 'where ' + where.join(' and ') : '',
         'limit 1'
     ];
-    const pdata = await connection.query(getQuery, params);
+    const pdata = await connection.query(getQuery.join(' '), params);
     if (pdata.length == 0) return null;
     return pdata.rows[0];
 }
