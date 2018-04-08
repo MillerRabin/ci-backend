@@ -1,5 +1,6 @@
 const db = require('../postgres/postgres.js');
 
-exports.deploy = async (commands) => {
-    return true;
+exports.start = async (projectData) => {
+    console.log(projectData);
+    return projectData;
 };

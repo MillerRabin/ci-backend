@@ -1,6 +1,7 @@
 const Router = require('koa-router');
 const koaBody = require('koa-body');
 const response = require('../../middlewares/response.js');
+const deploy = require('../deploy/deploy.js');
 
 async function logGit(pobj) {
     const addQuery = 'insert into git_logs (event_data, deploy_results, error) values($1, $2, $3)';
@@ -50,7 +51,7 @@ async function deployProject(connection, data) {
     const obj = parseBitbucketStructure(data);
     if (obj == null) return null;
     const pdata = await getProject(connection, obj);
-    return { success: true };
+    return await deploy.start(pdata);
 }
 
 exports.addController = (application, controllerName) => {
