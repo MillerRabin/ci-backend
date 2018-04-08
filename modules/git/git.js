@@ -60,7 +60,7 @@ exports.addController = (application, controllerName) => {
         const connection = await application.pool.connect();
         try {
             try {
-                const deployResult = await deployProject(data);
+                const deployResult = await deployProject(connection, data);
                 await logGit({ connection, data, deployResult });
             } catch (e) {
                 await logGit({ connection, data, error: e });
