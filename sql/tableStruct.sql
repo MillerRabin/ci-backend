@@ -6,7 +6,9 @@ alter user postgres password 'ifyouwanttohave';
 
 create table git_logs (
     event_time timestamp with time zone not null default now(),
-    event_data jsonb
+    event_data jsonb,
+    deploy_results jsonb,
+    error jsonb
 );
 
 create table projects (
@@ -25,3 +27,5 @@ values ('ci-backend', 'production', '[ "cd /usr/raintech/ci", "git clone git@bit
 '["cd /usr/raintech/ci/ci-backend", "git pull origin production"]',
 '{ "host": "ci.raintech.su", "user": "ci", "password": "ifyouwanttohave"}'
 )
+
+select * from git_logs;
