@@ -26,10 +26,9 @@ if (exports.production == null)
 
 
 exports.commonName = 'ci.raintech.su';
-exports.useHttp2 = exports.production;
+exports.useHttp2 = false;
 
 exports.port = process.env.PORT | 8094;
-exports.allowEveryone = true;
 
 exports.settings = exports.production ? productionSettings : developSettings;
 
