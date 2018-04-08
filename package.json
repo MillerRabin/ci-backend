@@ -1,0 +1,25 @@
+{
+  "name": "ci-backend",
+  "version": "1.0.0",
+  "description": "Backend part of Raintech CI Project",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://millerrabin@bitbucket.org/raintechteam/ci-backend.git"
+  },
+  "author": "millerrabin",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/raintechteam/ci-backend#readme",
+  "dependencies": {
+    "koa": "^2.5.0",
+    "koa-body": "^2.5.0",
+    "koa-router": "^7.4.0",
+    "koa-static": "^4.0.2",
+    "koa2-cors": "^2.0.5",
+    "moment": "^2.22.0",
+    "pg": "^7.4.1"
+  }
+}
