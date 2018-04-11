@@ -13,22 +13,6 @@ async function logGit(pobj) {
     return await pobj.connection.query(addQuery, params);
 }
 
-async function getProject(connection, data) {
-    const params = [];
-    const where = [];
-    if (data.project != null) where.push(`project_name = $${ params.push(data.project) }`);
-    if (data.branch != null) where.push(`branch = $${ params.push(data.branch) }`);
-    if (where.length == 0) throw new response.Error({ text: 'Invalid parameters'});
-    const getQuery = [
-        'select * from projects',
-        (where.length > 0) ? 'where ' + where.join(' and ') : '',
-        'limit 1'
-    ];
-    const pdata = await connection.query(getQuery.join(' '), params);
-    if (pdata.rows.length == 0) return null;
-    return pdata.rows[0];
-}
-
 function parseBitbucketStructure(data) {
     const repository = data.repository;
     if (repository == null) throw new response.Error({ repository: 'Invalid repository'});
@@ -50,7 +34,7 @@ function parseBitbucketStructure(data) {
 async function deployProject(connection, data) {
     const obj = parseBitbucketStructure(data);
     if (obj == null) return null;
-    const pdata = await getProject(connection, obj);
+    const pdata = await deploy.getProject(connection, obj);
     if (pdata == null) return { text: 'No project to deploy' };
     return await deploy.start(pdata);
 }
