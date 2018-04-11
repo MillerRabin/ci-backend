@@ -33,4 +33,6 @@ select * from projects;
 
 update projects set credentials = '{ "host": "ci.raintech.su", "port": 22, "username": "ci", "password": "ifyouwanttohave"}' where id = 1;
 
-update projects set deploy = '["git pull origin production", "sudo systemctl restart ci"]' where id = 1;
+update projects set deploy = '["git pull origin production", "npm install", "sudo systemctl restart ci"]' where id = 1;
+
+select * from git_logs order by event_time desc;
