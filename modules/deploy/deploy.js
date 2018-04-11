@@ -31,7 +31,7 @@ exports.start = async (projectData) => {
             stderr: result.stderr
         });
     }
-    return dres;
+    return { results: dres };
 };
 
 exports.test = async (application) => {
