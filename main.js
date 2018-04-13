@@ -57,10 +57,6 @@ async function start(application, port) {
     try {
         application.pool = await createPool(application);
         await createServer(application, port);
-
-/*        const deploy = require('./modules/deploy/deploy.js');
-        deploy.test(application);*/
-
     } catch (err) {
         console.log(err);
     }

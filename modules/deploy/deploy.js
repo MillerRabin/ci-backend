@@ -17,27 +17,72 @@ exports.getProject = async (connection, data) => {
     return pdata.rows[0];
 };
 
-exports.start = async (projectData) => {
+async function deploy(params) {
     const dres = [];
+    for (let command of params.projectData.deploy) {
+        const result = await params.ssh.execCommand(command, { cwd: params.cwd });
+        dres.push({
+            command: command,
+            cwd: params.cwd,
+            stdout: result.stdout,
+            stderr: result.stderr,
+            code: result.code
+        });
+        if (result.code != 0) return { results: dres, success: false };
+    }
+    return { results: dres, success: true };
+}
+
+async function testRepository(params) {
+    const dres = [];
+    for (let command of params.projectData.test) {
+        const result = await params.ssh.execCommand(command, { cwd: params.cwd });
+        dres.push({
+            command: command,
+            cwd: params.cwd,
+            stdout: result.stdout,
+            stderr: result.stderr,
+            code: result.code
+        });
+        if (result.code != 0) return { results: dres, success: false };
+    }
+    return { results: dres, success: true };
+}
+
+async function initRepository(params) {
+    const dres = [];
+    for (let command of params.projectData.init) {
+        const result = await params.ssh.execCommand(command, { cwd: params.cwd });
+        dres.push({
+            command: command,
+            cwd: params.cwd,
+            stdout: result.stdout,
+            stderr: result.stderr,
+            code: result.code
+        });
+        if (result.code != 0) return { results: dres, success: false };
+    }
+    return { results: dres, success: true };
+}
+
+exports.start = async (projectData) => {
     const ssh = new node_ssh();
     await ssh.connect(projectData.credentials);
     const cwd = projectData.project_directory + '/' + projectData.project_name;
-    for (let command of projectData.deploy) {
-        const result = await ssh.execCommand(command, { cwd: cwd });
-        dres.push({
-            command: command,
-            cwd: cwd,
-            stdout: result.stdout,
-            stderr: result.stderr
-        });
+    const tres = await testRepository({ ssh, cwd, projectData });
+    if (tres.success) {
+        const dres = await deploy({ ssh, cwd, projectData });
+        return { test: tres, deploy: dres };
+    } else {
+        const ires = await initRepository({ ssh, cwd, projectData });
+        return { test: tres, init: ires };
     }
-    return { results: dres };
 };
 
 exports.test = async (application) => {
     const connection = await application.pool.connect();
     try {
-        const pdata = await exports.getProject(connection, { project: 'ci-backend', branch: 'production'});
+        const pdata = await exports.getProject(connection, { project: 'billing-backend', branch: 'production'});
         if (pdata == null) return;
         await exports.start(pdata);
     } finally {

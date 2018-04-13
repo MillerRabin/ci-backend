@@ -41,9 +41,13 @@ update projects set deploy = '["git pull origin production", "npm install", "sud
 select * from git_logs order by event_time desc;
 
 insert into projects (project_name, branch, init, deploy, credentials, project_directory, test)
-values ('billing-backend', 'production', '[ "cd /usr/raintech/billing", "git clone git@bitbucket.org:raintechteam/billing-backend.git" ]',
-'["git pull origin production"]',
+values ('billing-backend', 'production',
+'[ "git clone git@bitbucket.org:raintechteam/billing-backend.git /usr/raintech/billing/billing-backend", "cd /usr/raintech/billing/billing-backend", "git pull origin production", "npm install" ]',
+'["git pull origin production", "npm install", "sudo systemctl restart billing"]',
 '{ "host": "billing.raintech.su", "user": "ci", "password": "ifyouwanttohave"}',
 '/usr/raintech/billing',
 '[ "cd /usr/raintech/billing/billing-backed" ]'
 )
+
+update projects set deploy = '["git pull origin production", "npm install", "sudo systemctl restart billing"]'
+where id = 2;
