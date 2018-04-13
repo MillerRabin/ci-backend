@@ -20,8 +20,11 @@ create table projects (
     init jsonb,
     deploy jsonb,
     credentials jsonb,
-    project_directory varchar(320)
+    project_directory varchar(320),
+    test jsonb
 );
+
+alter table projects add column test jsonb;
 
 insert into projects (project_name, branch, init, deploy, credentials)
 values ('ci-backend', 'production', '[ "cd /usr/raintech/ci", "git clone git@bitbucket.org:raintechteam/ci-backend.git" ]',
@@ -36,3 +39,11 @@ update projects set credentials = '{ "host": "ci.raintech.su", "port": 22, "user
 update projects set deploy = '["git pull origin production", "npm install", "sudo systemctl restart ci"]' where id = 1;
 
 select * from git_logs order by event_time desc;
+
+insert into projects (project_name, branch, init, deploy, credentials, project_directory, test)
+values ('billing-backend', 'production', '[ "cd /usr/raintech/billing", "git clone git@bitbucket.org:raintechteam/billing-backend.git" ]',
+'["git pull origin production"]',
+'{ "host": "billing.raintech.su", "user": "ci", "password": "ifyouwanttohave"}',
+'/usr/raintech/billing',
+'[ "cd /usr/raintech/billing/billing-backed" ]'
+)
