@@ -42,9 +42,7 @@ async function deployProject(connection, data) {
 exports.addController = (application, controllerName) => {
     const router = new Router();
 
-    console.log('init controllers');
     router.post('/' + controllerName + '/bitbucket', koaBody(), async (ctx) => {
-        console.log('bitbucket');
         const data = ctx.request.body;
         const connection = await application.pool.connect();
         try {
@@ -55,7 +53,7 @@ exports.addController = (application, controllerName) => {
             } catch (e) {
                 console.log(e);
                 await logGit({ connection, data, error: e });
-                throw e;
+                return { error: e };
             }
         } finally {
             await connection.release();
