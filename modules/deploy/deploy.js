@@ -35,6 +35,8 @@ async function deploy(params) {
 
 async function testRepository(params) {
     const dres = [];
+    const resObj = { results: dres, success: true };
+    if (params.projectData.test == null) return resObj;
     for (let command of params.projectData.test) {
         const result = await params.ssh.execCommand(command, { cwd: params.cwd });
         dres.push({
@@ -44,9 +46,12 @@ async function testRepository(params) {
             stderr: result.stderr,
             code: result.code
         });
-        if (result.code != 0) return { results: dres, success: false };
+        if (result.code != 0) {
+            resObj.success = false;
+            return resObj;
+        }
     }
-    return { results: dres, success: true };
+    return resObj;
 }
 
 async function initRepository(params) {

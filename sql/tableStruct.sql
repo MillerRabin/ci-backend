@@ -51,3 +51,5 @@ values ('billing-backend', 'production',
 
 update projects set deploy = '["git pull origin production", "npm install", "sudo systemctl restart billing"]'
 where id = 2;
+
+update projects set test = '[ "cd /usr/raintech/ci/ci-backed" ]'
