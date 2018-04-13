@@ -39,7 +39,7 @@ function createServer(application, port) {
                 http.createServer(application.callback());
         server.listen(port, (err) => {
             if (err != null) return reject(err);
-            console.log('Server is ready to accept connections at ' + port);
+            console.log('Server accepts connections at ' + port);
             return resolve();
         });
     });
