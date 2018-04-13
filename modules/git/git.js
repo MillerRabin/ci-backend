@@ -46,16 +46,14 @@ exports.addController = (application, controllerName) => {
         const data = ctx.request.body;
         const connection = await application.pool.connect();
         try {
-            return {test: true};
-            /*try {
+            try {
                 const deployResult = await deployProject(connection, data);
                 await logGit({ connection, data, deployResult });
                 return deployResult;
             } catch (e) {
-                console.log(e);
                 await logGit({ connection, data, error: e });
-                return { error: e };
-            }*/
+                throw e;
+            }
         } finally {
             await connection.release();
         }
