@@ -43,6 +43,7 @@ exports.addController = (application, controllerName) => {
     const router = new Router();
 
     router.post('/' + controllerName + '/bitbucket', koaBody(), async (ctx) => {
+        console.log('bitbucket');
         const data = ctx.request.body;
         const connection = await application.pool.connect();
         try {
