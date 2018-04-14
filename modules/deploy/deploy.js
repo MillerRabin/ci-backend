@@ -70,19 +70,46 @@ async function initRepository(params) {
     return { results: dres, success: true };
 }
 
+async function reload(params) {
+    const dres = [];
+    const resObj = { results: dres, success: true };
+    if (params.projectData.reload == null) return resObj;
+
+    for (let command of params.projectData.reload) {
+        const result = await params.ssh.execCommand(command, { cwd: params.cwd });
+        dres.push({
+            command: command,
+            cwd: params.cwd,
+            stdout: result.stdout,
+            stderr: result.stderr,
+            code: result.code
+        });
+        if (result.code != 0) {
+            resObj.success = false;
+            return resObj;
+        }
+    }
+    return resObj;
+}
+
 exports.start = async (projectData) => {
+    async function ireload() {
+        return await reload({ ssh, cwd, projectData });
+    }
     const ssh = new node_ssh();
     await ssh.connect(projectData.credentials);
     const cwd = projectData.project_directory + '/' + projectData.project_name;
     const tres = await testRepository({ ssh, cwd, projectData });
     if (tres.success) {
         const dres = await deploy({ ssh, cwd, projectData });
-        return { test: tres, deploy: dres };
+        return { test: tres, deploy: dres, reload: ireload };
     } else {
         const ires = await initRepository({ ssh, cwd, projectData });
-        return { test: tres, init: ires };
+        return { test: tres, init: ires, reload: ireload };
     }
 };
+
+
 
 exports.test = async (application) => {
     const connection = await application.pool.connect();

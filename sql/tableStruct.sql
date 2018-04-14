@@ -15,16 +15,15 @@ create table projects (
     id serial primary key,
     reg_time timestamp with time zone not null default now(),
     update_time timestamp with time zone not null default now(),
-    project_name varchar(100),
-    branch varchar(100),
+    project_name varchar(100) not null,
+    branch varchar(100) not null default 'master',
     init jsonb,
-    deploy jsonb,
-    credentials jsonb,
-    project_directory varchar(320),
-    test jsonb
+    deploy jsonb not null,
+    credentials jsonb not null,
+    project_directory varchar(320) not null,
+    test jsonb,
+    reload jsonb
 );
-
-alter table projects add column test jsonb;
 
 insert into projects (project_name, branch, init, deploy, credentials)
 values ('ci-backend', 'production', '[ "cd /usr/raintech/ci", "git clone git@bitbucket.org:raintechteam/ci-backend.git" ]',
@@ -40,17 +39,14 @@ update projects set deploy = '["git pull origin production", "npm install", "sud
 
 select * from git_logs order by event_time desc;
 
-insert into projects (project_name, branch, init, deploy, credentials, project_directory, test)
+insert into projects (project_name, branch, init, deploy, credentials, project_directory, test, reload)
 values ('billing-backend', 'production',
 '[ "git clone git@bitbucket.org:raintechteam/billing-backend.git /usr/raintech/billing/billing-backend", "cd /usr/raintech/billing/billing-backend", "git pull origin production", "npm install" ]',
-'["git pull origin production", "npm install", "sudo systemctl restart billing"]',
+'["git pull origin production", "npm install"]',
 '{ "host": "billing.raintech.su", "user": "ci", "password": "ifyouwanttohave"}',
 '/usr/raintech/billing',
-'[ "cd /usr/raintech/billing/billing-backed" ]'
+'[ "cd /usr/raintech/billing/billing-backed" ]',
+'[ "sudo systemctl restart billing" ]'
 )
 
-update projects set init = '[ "git clone git@bitbucket.org:raintechteam/ci-backend.git /usr/raintech/ci/ci-backend", "cd /usr/raintech/ci/ci-backend", "git pull origin production", "npm install" ]'
-where id = 1;
-
-update projects set test = '[ "cd /usr/raintech/billing/billing-backend" ]' where id = 2;
-
+select * from projects;
