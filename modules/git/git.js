@@ -52,7 +52,7 @@ exports.addController = (application, controllerName) => {
                 setTimeout(() => {
                     deployResult.reload();
                 }, 1000);
-                return deployResult;
+                return { success: true };
             } catch (e) {
                 await logGit({ connection, data, error: e });
                 throw e;
