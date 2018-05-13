@@ -1,5 +1,4 @@
 const node_ssh = require('node-ssh');
-const path = require('path');
 
 exports.getProject = async (connection, data) => {
     const params = [];
@@ -23,7 +22,6 @@ async function deploy(params) {
         const result = await params.ssh.execCommand(command, { cwd: params.cwd });
         dres.push({
             command: command,
-            cwd: params.cwd,
             stdout: result.stdout,
             stderr: result.stderr,
             code: result.code
@@ -41,6 +39,7 @@ async function testRepository(params) {
         const result = await params.ssh.execCommand(command, { cwd: params.cwd });
         dres.push({
             command: command,
+            cwd: params.cwd,
             stdout: result.stdout,
             stderr: result.stderr,
             code: result.code
