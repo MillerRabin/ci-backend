@@ -25,28 +25,28 @@ create table projects (
     reload jsonb
 );
 
-insert into projects (project_name, branch, init, deploy, credentials)
-values ('ci-backend', 'production', '[ "cd /usr/raintech/ci", "git clone git@bitbucket.org:raintechteam/ci-backend.git" ]',
-'["cd /usr/raintech/ci/ci-backend", "git pull origin production"]',
-'{ "host": "ci.raintech.su", "user": "ci", "password": "ifyouwanttohave"}'
-)
-
-select * from projects;
-
-update projects set credentials = '{ "host": "ci.raintech.su", "port": 22, "username": "ci", "password": "ifyouwanttohave"}' where id = 1;
-
-update projects set deploy = '["git pull origin production", "npm install", "sudo systemctl restart ci"]' where id = 1;
+create unique index projects_name_index on projects (project_name);
 
 select * from git_logs order by event_time desc;
 
 insert into projects (project_name, branch, init, deploy, credentials, project_directory, test, reload)
-values ('billing-backend', 'production',
-'[ "git clone git@bitbucket.org:raintechteam/billing-backend.git /usr/raintech/billing/billing-backend", "cd /usr/raintech/billing/billing-backend", "git pull origin production", "npm install" ]',
+values ('personal-backend', 'production',
+'[ "git clone git@bitbucket.org:raintechteam/personal-backend.git /usr/raintech/personal/personal-backend", "cd /usr/raintech/personal/personal-backend", "git pull origin production", "npm install" ]',
 '["git pull origin production", "npm install"]',
-'{ "host": "billing.raintech.su", "user": "ci", "password": "ifyouwanttohave"}',
-'/usr/raintech/billing',
-'[ "cd /usr/raintech/billing/billing-backed" ]',
-'[ "sudo systemctl restart billing" ]'
+'{ "host": "raintech.su", "user": "ci", "password": "ifyouwanttohave"}',
+'/usr/raintech/personal',
+'[ "cd /usr/raintech/personal/personal-backend" ]',
+'[ "sudo systemctl restart personal" ]'
 )
 
 select * from projects;
+
+insert into projects (project_name, branch, init, deploy, credentials, project_directory, test, reload)
+values ('personal-frontend', 'production',
+'[ "git clone git@bitbucket.org:raintechteam/personal-frontend.git /usr/raintech/personal/personal-frontend", "cd /usr/raintech/personal/personal-frontend", "git pull origin production", "npm install", "cd builder", "npm install", "node main.js" ]',
+'["git pull origin production", "npm install", "cd builder", "npm install", "node main.js"]',
+'{ "host": "raintech.su", "user": "ci", "password": "ifyouwanttohave"}',
+'/usr/raintech/personal',
+'[ "cd /usr/raintech/personal/personal-frontend" ]',
+null
+)

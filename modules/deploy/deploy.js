@@ -41,7 +41,6 @@ async function testRepository(params) {
         const result = await params.ssh.execCommand(command, { cwd: params.cwd });
         dres.push({
             command: command,
-            cwd: params.cwd,
             stdout: result.stdout,
             stderr: result.stderr,
             code: result.code
