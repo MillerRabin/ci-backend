@@ -51,4 +51,4 @@ values ('personal-frontend', 'production',
 null
 )
 
-update projects set deploy = '["git pull origin production", "npm install", "npm install", "node builder/main.js"]' where project_name = 'personal-frontend';
+update projects set deploy = '["git pull origin production", "npm install", { "cwd": "/usr/raintech/personal/personal-frontend/builder", "command": "npm install" }, "node main.js"]' where project_name = 'personal-frontend';

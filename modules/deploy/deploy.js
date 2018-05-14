@@ -23,12 +23,17 @@ function getCommand(command, params) {
     return (command.command != null) ? command.command : command;
 }
 
-async function deploy(params) {
+async function executeCommands(commands, params) {
     const dres = [];
-    for (let command of params.projectData.deploy) {
+    if (commands == null)
+        return { results: dres, success: false };
+
+    for (let command of commands) {
         const result = await params.ssh.execCommand(command, { cwd: params.cwd });
+        const command = getCommand(command, params);
+        if ((command == null) || (command == '')) continue;
         dres.push({
-            command: getCommand(command, params),
+            command: command,
             cwd: params.cwd,
             stdout: result.stdout,
             stderr: result.stderr,
@@ -37,65 +42,22 @@ async function deploy(params) {
         if (result.code != 0) return { results: dres, success: false };
     }
     return { results: dres, success: true };
+}
+
+async function deploy(params) {
+    return await executeCommands(params.projectData.deploy, params)
 }
 
 async function testRepository(params) {
-    const dres = [];
-    const resObj = { results: dres, success: true };
-    if (params.projectData.test == null) return resObj;
-    for (let command of params.projectData.test) {
-        const result = await params.ssh.execCommand(command, { cwd: params.cwd });
-        dres.push({
-            command: getCommand(command, params),
-            cwd: params.cwd,
-            stdout: result.stdout,
-            stderr: result.stderr,
-            code: result.code
-        });
-        if (result.code != 0) {
-            resObj.success = false;
-            return resObj;
-        }
-    }
-    return resObj;
+    return await executeCommands(params.projectData.test, params);
 }
 
 async function initRepository(params) {
-    const dres = [];
-    for (let command of params.projectData.init) {
-        const result = await params.ssh.execCommand(command, { cwd: params.cwd });
-        dres.push({
-            command: getCommand(command, params),
-            cwd: params.cwd,
-            stdout: result.stdout,
-            stderr: result.stderr,
-            code: result.code
-        });
-        if (result.code != 0) return { results: dres, success: false };
-    }
-    return { results: dres, success: true };
+    return await executeCommands(params.projectData.init, params);
 }
 
 async function reload(params) {
-    const dres = [];
-    const resObj = { results: dres, success: true };
-    if (params.projectData.reload == null) return resObj;
-
-    for (let command of params.projectData.reload) {
-        const result = await params.ssh.execCommand(command, { cwd: params.cwd });
-        dres.push({
-            command: getCommand(command, params),
-            cwd: params.cwd,
-            stdout: result.stdout,
-            stderr: result.stderr,
-            code: result.code
-        });
-        if (result.code != 0) {
-            resObj.success = false;
-            return resObj;
-        }
-    }
-    return resObj;
+    return await executeCommands(params.projectData.reload, params);
 }
 
 exports.start = async (projectData) => {
@@ -114,8 +76,6 @@ exports.start = async (projectData) => {
         return { test: tres, init: ires, reload: ireload };
     }
 };
-
-
 
 exports.test = async (application) => {
     const connection = await application.pool.connect();
