@@ -16,12 +16,20 @@ exports.getProject = async (connection, data) => {
     return pdata.rows[0];
 };
 
+function getCommand(command, params) {
+    if (command.cwd != null) {
+        params.cwd = command.cwd
+    }
+    return (command.command != null) ? command.command : command;
+}
+
 async function deploy(params) {
     const dres = [];
     for (let command of params.projectData.deploy) {
         const result = await params.ssh.execCommand(command, { cwd: params.cwd });
         dres.push({
-            command: command,
+            command: getCommand(command, params),
+            cwd: params.cwd,
             stdout: result.stdout,
             stderr: result.stderr,
             code: result.code
@@ -38,7 +46,7 @@ async function testRepository(params) {
     for (let command of params.projectData.test) {
         const result = await params.ssh.execCommand(command, { cwd: params.cwd });
         dres.push({
-            command: command,
+            command: getCommand(command, params),
             cwd: params.cwd,
             stdout: result.stdout,
             stderr: result.stderr,
@@ -57,7 +65,7 @@ async function initRepository(params) {
     for (let command of params.projectData.init) {
         const result = await params.ssh.execCommand(command, { cwd: params.cwd });
         dres.push({
-            command: command,
+            command: getCommand(command, params),
             cwd: params.cwd,
             stdout: result.stdout,
             stderr: result.stderr,
@@ -76,7 +84,7 @@ async function reload(params) {
     for (let command of params.projectData.reload) {
         const result = await params.ssh.execCommand(command, { cwd: params.cwd });
         dres.push({
-            command: command,
+            command: getCommand(command, params),
             cwd: params.cwd,
             stdout: result.stdout,
             stderr: result.stderr,
