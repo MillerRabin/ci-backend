@@ -29,8 +29,8 @@ async function executeCommands(commands, params) {
         return { results: dres, success: false };
 
     for (let command of commands) {
-        const command = getCommand(command, params);
-        const result = await params.ssh.execCommand(command, { cwd: params.cwd });
+        const execCommand = getCommand(command, params);
+        const result = await params.ssh.execCommand(execCommand, { cwd: params.cwd });
         if ((command == null) || (command == '')) continue;
         dres.push({
             command: command,
