@@ -26,7 +26,7 @@ if (exports.production == null)
 
 
 exports.commonName = 'ci.raintech.su';
-exports.useHttp2 = false;
+exports.useHttp2 = true;
 
 exports.port = process.env.PORT | 8094;
 
