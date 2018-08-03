@@ -4,11 +4,13 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const http2 = require('http2');
+
 const koaStatic = require('koa-static');
 const cors = require('koa2-cors');
 const { Pool } = require('pg');
 
 const git = require('./modules/git/git.js');
+const mail = require('./modules/mail/mail.js');
 
 const response = require('./middlewares/response.js');
 const responseTime = require('./middlewares/responseTime.js');
@@ -24,6 +26,7 @@ if (!config.production) {
 application.use(response.koa);
 
 git.addController(application, 'api/git');
+mail.addController(application, 'api/mail');
 
 
 function createServer(application, port) {

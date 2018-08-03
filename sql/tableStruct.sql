@@ -42,13 +42,16 @@ values ('personal-backend', 'production',
 select * from projects;
 
 insert into projects (project_name, branch, init, deploy, credentials, project_directory, test, reload)
-values ('personal-frontend', 'production',
-'[ "git clone git@bitbucket.org:raintechteam/personal-frontend.git /usr/raintech/personal/personal-frontend", "cd /usr/raintech/personal/personal-frontend", "git pull origin production", "npm install", "cd builder", "npm install", "node main.js" ]',
-'["git pull origin production", "npm install", "cd builder", "npm install", "node main.js"]',
+values ('auth-frontend', 'production',
+'[ "git clone git@bitbucket.org:raintechteam/auth-frontend.git /usr/auth/auth-frontend", "cd /usr/ci/auth-frontend", "git pull origin production", "npm install" ]',
+'["git pull origin production", "npm install" ]',
 '{ "host": "raintech.su", "user": "ci", "password": "ifyouwanttohave"}',
-'/usr/raintech/personal',
-'[ "cd /usr/raintech/personal/personal-frontend" ]',
+'/usr/auth',
+'[ "cd /usr/auth/auth-frontend" ]',
 null
 )
 
-update projects set deploy = '["git pull origin production", "npm install", { "cwd": "/usr/raintech/personal/personal-frontend/builder", "command": "npm install" }, "node main.js"]' where project_name = 'personal-frontend';
+update projects set deploy = '["git clean -fd", "git reset --hard HEAD", "git pull origin production", "npm install"]' where project_name = 'ci-frontend';
+
+select * from projects;
+
