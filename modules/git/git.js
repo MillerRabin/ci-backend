@@ -2,6 +2,7 @@ const Router = require('koa-router');
 const koaBody = require('koa-body');
 const response = require('../../middlewares/response.js');
 const deploy = require('../deploy/deploy.js');
+const projects = require('../projects/projects.js');
 
 async function logGit(pobj) {
     const addQuery = 'insert into git_logs (event_data, deploy_results, error) values($1, $2, $3)';
@@ -34,7 +35,7 @@ function parseBitbucketStructure(data) {
 async function deployProject(connection, data) {
     const obj = parseBitbucketStructure(data);
     if (obj == null) return { text: 'Can`t get information from bitbucket structure'};
-    const pdata = await deploy.getProject(connection, obj);
+    const pdata = await projects.getProject(connection, obj);
     if (pdata == null) return { text: 'No project to deploy' };
     return await deploy.start(pdata);
 }

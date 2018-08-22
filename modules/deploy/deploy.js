@@ -1,21 +1,5 @@
 const node_ssh = require('node-ssh');
 
-exports.getProject = async (connection, data) => {
-    const params = [];
-    const where = [];
-    if (data.project != null) where.push(`project_name = $${ params.push(data.project) }`);
-    if (data.branch != null) where.push(`branch = $${ params.push(data.branch) }`);
-    if (where.length == 0) throw new response.Error({ text: 'Invalid parameters'});
-    const getQuery = [
-        'select * from projects',
-        (where.length > 0) ? 'where ' + where.join(' and ') : '',
-        'limit 1'
-    ];
-    const pdata = await connection.query(getQuery.join(' '), params);
-    if (pdata.rows.length == 0) return null;
-    return pdata.rows[0];
-};
-
 function getCommand(command, params) {
     if (command.cwd != null) {
         params.cwd = command.cwd
@@ -74,16 +58,5 @@ exports.start = async (projectData) => {
     } else {
         const ires = await initRepository({ ssh, cwd, projectData });
         return { test: tres, init: ires, reload: ireload };
-    }
-};
-
-exports.test = async (application) => {
-    const connection = await application.pool.connect();
-    try {
-        const pdata = await exports.getProject(connection, { project: 'billing-backend', branch: 'production'});
-        if (pdata == null) return;
-        await exports.start(pdata);
-    } finally {
-        await connection.release();
     }
 };

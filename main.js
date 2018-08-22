@@ -11,6 +11,7 @@ const { Pool } = require('pg');
 
 const git = require('./modules/git/git.js');
 const mail = require('./modules/mail/mail.js');
+const projects = require('./modules/projects/projects.js');
 
 const response = require('./middlewares/response.js');
 const responseTime = require('./middlewares/responseTime.js');
@@ -27,7 +28,7 @@ application.use(response.koa);
 
 git.addController(application, 'api/git');
 mail.addController(application, 'api/mail');
-
+projects.addController(application, 'api/projects');
 
 function createServer(application, port) {
     return new Promise((resolve, reject) => {

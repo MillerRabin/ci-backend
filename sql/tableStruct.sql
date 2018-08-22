@@ -22,10 +22,13 @@ create table projects (
     credentials jsonb not null,
     project_directory varchar(320) not null,
     test jsonb,
-    reload jsonb
+    reload jsonb,
+    owner uuid
 );
 
-create unique index projects_name_index on projects (project_name);
+alter table projects add column owner uuid;
+
+create unique index projects_name_index on projects (project_name, owner);
 
 select * from git_logs order by event_time desc;
 
