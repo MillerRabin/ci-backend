@@ -8,8 +8,15 @@ create table git_logs (
     event_time timestamp with time zone not null default now(),
     event_data jsonb,
     deploy_results jsonb,
-    error jsonb
+    error jsonb,
+    owner uuid not null
 );
+
+alter table git_logs alter column owner drop not null;
+
+create index git_logs_time on git_logs (event_time desc);
+create index git_logs_owner on git_logs (owner);
+
 
 create table projects (
     id serial primary key,
@@ -25,8 +32,6 @@ create table projects (
     reload jsonb,
     owner uuid
 );
-
-alter table projects add column owner uuid;
 
 create unique index projects_name_index on projects (project_name, owner);
 
@@ -56,5 +61,14 @@ null
 
 update projects set deploy = '["git clean -fd", "git reset --hard HEAD", "git pull origin production", "npm install"]' where project_name = 'ci-frontend';
 
-select * from projects;
 
+select * from git_logs limit 100 offset 0;
+
+with prj_logs as (
+    select btrim((event_data -> 'repository' -> 'name')::text, '"') project_name from git_logs
+)
+select prj.owner from prj_logs gl
+inner join projects prj on (prj.project_name = gl.project_name);
+
+
+update git_logs set owner = 'c6302b79-aec3-4e09-b72d-a2d4d415eec8';

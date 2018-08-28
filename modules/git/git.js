@@ -5,11 +5,12 @@ const deploy = require('../deploy/deploy.js');
 const projects = require('../projects/projects.js');
 
 async function logGit(pobj) {
-    const addQuery = 'insert into git_logs (event_data, deploy_results, error) values($1, $2, $3)';
+    const addQuery = 'insert into git_logs (event_data, deploy_results, error, owner) values($1, $2, $3, $4)';
     const params = [
         pobj.data,
         (pobj.deployResult == null) ? null : pobj.deployResult,
-        (pobj.error == null) ? null : pobj.error
+        (pobj.error == null) ? null : pobj.error,
+        pobj.owner
     ];
     return await pobj.connection.query(addQuery, params);
 }
@@ -37,7 +38,10 @@ async function deployProject(connection, data) {
     if (obj == null) return { text: 'Can`t get information from bitbucket structure'};
     const pdata = await projects.getProject(connection, obj);
     if (pdata == null) return { text: 'No project to deploy' };
-    return await deploy.start(pdata);
+    return {
+        project: pdata,
+        results: await deploy.start(pdata)
+    };
 }
 
 exports.addController = (application, controllerName) => {
@@ -48,14 +52,16 @@ exports.addController = (application, controllerName) => {
         const connection = await application.pool.connect();
         try {
             try {
-                const deployResult = await deployProject(connection, data);
-                await logGit({ connection, data, deployResult });
+                const dr = await deployProject(connection, data);
+                const deployResult = dr.results;
+                const owner = dr.project.owner;
+                await logGit({ connection, data, deployResult, owner });
                 setTimeout(() => {
                     if (deployResult.reload != null) deployResult.reload();
                 }, 1000);
                 return { success: true };
             } catch (e) {
-                await logGit({ connection, data, error: e });
+                await logGit({ connection, data, error: e, owner });
                 throw e;
             }
         } finally {

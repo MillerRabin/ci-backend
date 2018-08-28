@@ -1,6 +1,5 @@
 const Router = require('koa-router');
 const koaBody = require('koa-body');
-const path = require('path');
 const response = require('../../middlewares/response.js');
 const certificate = require('../certificate/certificate.js');
 const db = require('../postgres/postgres.js');
@@ -10,7 +9,7 @@ exports.getProject = async (connection, data) => {
     const where = [];
     if (data.project != null) where.push(`project_name = $${ params.push(data.project) }`);
     if (data.branch != null) where.push(`branch = $${ params.push(data.branch) }`);
-    if (where.length == 0) throw new response.Error({ text: 'Invalid parameters'});
+    if (where.length == 0) throw new response.Error({ message: 'Invalid parameters'});
     const getQuery = [
         'select * from projects',
         (where.length > 0) ? 'where ' + where.join(' and ') : '',
@@ -25,7 +24,7 @@ exports.get = async ({connection, query, rowMode = 'array'}) => {
     const params = [];
     const where = [];
     if (query.owner != null) where.push(`owner = $${ params.push(query.owner) }`);
-    if (where.length == 0) throw new response.Error({ text: 'There are no valid fields'});
+    if (where.length == 0) throw new response.Error({ message: 'There are no valid fields'});
     const getQuery = [
         'select * from projects',
         (where.length > 0) ? 'where ' + where.join(' and ') : ''
