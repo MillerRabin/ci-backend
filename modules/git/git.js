@@ -4,12 +4,21 @@ const response = require('../../middlewares/response.js');
 const deploy = require('../deploy/deploy.js');
 const projects = require('../projects/projects.js');
 
+function copyError(error) {
+    const res = {};
+    for (let key in error) {
+        if (!error.hasOwnProperty(key)) continue;
+        res[key] = error[key];
+    }
+    return res;
+}
+
 async function logGit(pobj) {
     const addQuery = 'insert into git_logs (event_data, deploy_results, error, owner) values($1, $2, $3, $4)';
     const params = [
         pobj.data,
         (pobj.deployResult == null) ? null : pobj.deployResult,
-        (pobj.error == null) ? null : pobj.error,
+        (pobj.error == null) ? null : copyError(pobj.error),
         pobj.owner
     ];
     return await pobj.connection.query(addQuery, params);
