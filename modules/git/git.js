@@ -44,9 +44,9 @@ function parseBitbucketStructure(data) {
 
 async function deployProject(connection, data) {
     const obj = parseBitbucketStructure(data);
-    if (obj == null) return { text: 'Can`t get information from bitbucket structure'};
+    if (obj == null) return { results: { text: 'Can`t get information from bitbucket structure' }};
     const pdata = await projects.getProject(connection, obj);
-    if (pdata == null) return { text: 'No project to deploy' };
+    if (pdata == null) return { results: { text: 'No project to deploy' }};
     return {
         project: pdata,
         results: await deploy.start(pdata)
