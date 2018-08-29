@@ -61,7 +61,7 @@ exports.addController = (application, controllerName) => {
                 }, 1000);
                 return { success: true };
             } catch (e) {
-                await logGit({ connection, data, error: e, owner });
+                await logGit({ connection, data, error: e });
                 throw e;
             }
         } finally {
