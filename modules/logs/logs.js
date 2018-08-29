@@ -13,9 +13,13 @@ exports.get = async ({ connection, query = {}, rowMode = 'array' }) => {
     if (query.project != null)
         where.push(`event_data -> 'repository' -> 'name' project_name' = $${ params.push(query.project) }`);
 
+    if (query.owner != null)
+        where.push(`owner = $${ params.push(query.owner) }`);
+
     const getQuery = [
         'select event_time, event_data, deploy_results, error from git_logs',
         (where.length > 0) ? 'where ' + where.join(' and ') : '',
+        'order by event_time desc',
         'limit $1 offset $2'
     ];
     const dbQuery = {
@@ -33,6 +37,7 @@ exports.addController = (application, controllerName) => {
         const data = ctx.request.body;
         if (data.certificate == null) throw new response.Error({ certificate: 'certificate expected'});
         const session = await certificate.check(data.certificate);
+        data.owner = session.userId;
         const connection = await application.pool.connect();
         try {
             return db.formatResponse(await exports.get({ connection, query: data }));

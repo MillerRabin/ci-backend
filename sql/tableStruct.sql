@@ -62,7 +62,7 @@ null
 update projects set deploy = '["git clean -fd", "git reset --hard HEAD", "git pull origin production", "npm install"]' where project_name = 'ci-frontend';
 
 
-select * from git_logs limit 100 offset 0;
+select * from git_logs order by event_time desc limit 100 offset 0;
 
 with prj_logs as (
     select btrim((event_data -> 'repository' -> 'name')::text, '"') project_name from git_logs
