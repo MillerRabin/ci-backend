@@ -54,7 +54,7 @@ exports.addController = (application, controllerName) => {
             try {
                 const dr = await deployProject(connection, data);
                 const deployResult = dr.results;
-                const owner = dr.project.owner;
+                const owner = (dr.project == null) ? null : dr.project.owner;
                 await logGit({ connection, data, deployResult, owner });
                 setTimeout(() => {
                     if (deployResult.reload != null) deployResult.reload();

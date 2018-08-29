@@ -59,7 +59,7 @@ values ('auth-frontend', 'production',
 null
 )
 
-update projects set deploy = '["git clean -fd", "git reset --hard HEAD", "git pull origin production", "npm install"]' where project_name = 'ci-frontend';
+update projects set deploy = '["git clean -fd", "git reset --hard HEAD", "git pull origin production", "npm install"]' where project_name = 'ci-backend';
 
 
 select * from git_logs order by event_time desc limit 100 offset 0;
