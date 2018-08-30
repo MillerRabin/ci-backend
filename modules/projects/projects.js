@@ -24,6 +24,7 @@ exports.get = async ({connection, query, rowMode = 'array'}) => {
     const params = [];
     const where = [];
     if (query.owner != null) where.push(`owner = $${ params.push(query.owner) }`);
+    if (query.id != null) where.push(`id = $${ params.push(query.id) }`);
     if (where.length == 0) throw new response.Error({ message: 'There are no valid fields'});
     const getQuery = [
         'select * from projects',
@@ -43,13 +44,13 @@ exports.addController = (application, controllerName) => {
         const data = ctx.request.body;
         if (data.certificate == null) throw new response.Error({ certificate: 'certificate expected'});
         const session = await certificate.check(data.certificate);
+        const sData = { owner: session.userId };
+        if (data.id != null) sData.id = data.id;
         const connection = await application.pool.connect();
         try {
             return db.formatResponse(await exports.get({
                 connection,
-                query: {
-                    owner: session.userId
-                }
+                query: sData
             }));
         } finally {
             await connection.release();
