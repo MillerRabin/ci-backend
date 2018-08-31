@@ -38,6 +38,45 @@ exports.get = async ({connection, query, rowMode = 'array'}) => {
     return await connection.query(dbQuery);
 };
 
+exports.update = async ({ connection, query}) => {
+    if (query.id == null) throw new response.Error({ id: 'id expected'});
+    const params = [query.id];
+    const where = ['(id = $1)'];
+    if (query.owner != null)
+        where.push(`(owner = $${ params.push(query.owner)})`);
+
+    const uQuery = [];
+    if (query.repository != null) uQuery.push(`repository = $${ params.push(query.repository) }`);
+    if (query.project_name != null) uQuery.push(`project_name = $${ params.push(query.project_name) }`);
+    if (query.branch != null) uQuery.push(`branch = $${ params.push(query.branch) }`);
+    if ((Array.isArray(query.init)) && (query.init.length > 0))
+        uQuery.push(`init = $${ params.push(JSON.stringify(query.init)) }`);
+    if (((Array.isArray(query.init)) && (query.init.length == 0)) || (query.init === null))
+        uQuery.push(`init = null`);
+    if ((Array.isArray(query.deploy)) && (query.deploy.length > 0))
+        uQuery.push(`deploy = $${ params.push(JSON.stringify(query.deploy)) }`);
+    if (((Array.isArray(query.deploy)) && (query.deploy.length == 0)) || (query.deploy === null))
+        uQuery.push(`deploy = null`);
+    if (query.credentials != null) uQuery.push(`credentials = $${ params.push(JSON.stringify(query.credentials)) }`);
+    if (query.credentials === null) uQuery.push(`credentials = null`);
+    if (query.project_directory != null) uQuery.push(`project_directory = $${ params.push(query.project_directory) }`);
+    if ((Array.isArray(query.test)) && (query.test.length > 0))
+        uQuery.push(`test = $${ params.push(JSON.stringify(query.test)) }`);
+    if (((Array.isArray(query.test)) && (query.test.length == 0)) || (query.test === null))
+        uQuery.push(`test = null`);
+    if ((Array.isArray(query.reload)) && (query.reload.length > 0))
+        uQuery.push(`reload = $${ params.push(JSON.stringify(query.reload)) }`);
+    if (((Array.isArray(query.reload)) && (query.reload.length == 0)) || (query.reload === null))
+        uQuery.push(`reload = null`);
+    const dbQuery = {
+        text: `update projects set ${ uQuery.join(', ')} where ${ where.join(' and ')}`,
+        values: params,
+    };
+    const rData = await connection.query(dbQuery);
+    if (rData.rowCount == 0) throw new response.Error({ message: 'No project updated'});
+    return { message: 'update success' };
+};
+
 exports.addController = (application, controllerName) => {
     const router = new Router();
     router.post('/' + controllerName + '/get', koaBody(), async (ctx) => {
@@ -57,5 +96,19 @@ exports.addController = (application, controllerName) => {
         }
     });
 
+    router.put('/' + controllerName, koaBody({ strict: false }), async (ctx) => {
+        const data = ctx.request.body;
+        if (data.certificate == null) throw new response.Error({ certificate: 'certificate expected'});
+        const session = await certificate.check(data.certificate);
+        delete data.certificate;
+        data.owner = session.userId;
+
+        const connection = await application.pool.connect();
+        try {
+            return await exports.update({connection, query: data });
+        } finally {
+            await connection.release();
+        }
+    });
     application.use(router.routes());
 };

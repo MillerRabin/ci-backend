@@ -33,10 +33,13 @@ create table projects (
     project_directory varchar(320) not null,
     test jsonb,
     reload jsonb,
-    owner uuid
+    owner uuid,
+    repository varchar(320)
 );
 
 create unique index projects_name_index on projects (project_name, owner);
+
+alter table projects add column repository varchar(320);
 
 select * from git_logs order by event_time desc;
 
