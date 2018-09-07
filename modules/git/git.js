@@ -3,6 +3,7 @@ const koaBody = require('koa-body');
 const response = require('../../middlewares/response.js');
 const deploy = require('../deploy/deploy.js');
 const projects = require('../projects/projects.js');
+const client = require('raintech-auth-client');
 
 function copyError(error) {
     const res = {};
@@ -43,14 +44,18 @@ function parseBitbucketStructure(data) {
 }
 
 async function deployProject(connection, data) {
-    const obj = parseBitbucketStructure(data);
-    if (obj == null) return { results: { text: 'Can`t get information from bitbucket structure' }};
-    const pdata = await projects.getProject(connection, obj);
+    const pdata = await projects.getProject(connection, data);
     if (pdata == null) return { results: { text: 'No project to deploy' }};
     return {
         project: pdata,
         results: await deploy.start(pdata)
     };
+}
+
+async function deployProjectBitbucket(connection, data) {
+    const obj = parseBitbucketStructure(data);
+    if (obj == null) return { results: { text: 'Can`t get information from bitbucket structure' }};
+    return await deployProject(connection, obj);
 }
 
 exports.addController = (application, controllerName) => {
@@ -59,18 +64,54 @@ exports.addController = (application, controllerName) => {
     router.post('/' + controllerName + '/bitbucket', koaBody(), async (ctx) => {
         const data = ctx.request.body;
         const connection = await application.pool.connect();
+        const logData = { request: data };
         try {
             try {
-                const dr = await deployProject(connection, data);
+                const dr = await deployProjectBitbucket(connection, data);
                 const deployResult = dr.results;
                 const owner = (dr.project == null) ? null : dr.project.owner;
-                await logGit({ connection, data, deployResult, owner });
+                logData.project = dr.project;
+                await logGit({ connection, logData, deployResult, owner });
                 setTimeout(() => {
                     if (deployResult.reload != null) deployResult.reload();
                 }, 1000);
                 return { success: true };
             } catch (e) {
-                await logGit({ connection, data, error: e });
+                await logGit({ connection, logData, error: e });
+                throw e;
+            }
+        } finally {
+            await connection.release();
+        }
+    });
+
+    router.post('/' + controllerName + '/manual', koaBody(), async (ctx) => {
+        const data = ctx.request.body;
+        if (data.certificate == null) throw new response.Error({ message: 'certificate expected'});
+        if (data.id == null) throw new response.Error({ id: 'id of project expected'});
+        const session = await client.check(data.certificate);
+        delete data.certificate;
+        const connection = await application.pool.connect();
+        const logData = { request: data };
+        try {
+            try {
+                const dr = await deployProject(connection, {
+                    id: data.id,
+                    owner: session.userId
+                });
+                const deployResult = dr.results;
+                const owner = (dr.project == null) ? null : dr.project.owner;
+                logData.project = dr.project;
+                await logGit({
+                    connection,
+                    data: logData,
+                    deployResult, owner });
+                setTimeout(() => {
+                    if (deployResult.reload != null) deployResult.reload();
+                }, 1000);
+                return { success: true };
+            } catch (e) {
+                await logGit({ connection, logData, error: e });
                 throw e;
             }
         } finally {

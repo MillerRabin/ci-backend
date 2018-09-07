@@ -14,15 +14,16 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/raintechteam/ci-backend#readme",
   "dependencies": {
-    "koa": "^2.5.0",
-    "koa-body": "^2.5.0",
+    "koa": "^2.5.2",
+    "koa-body": "^2.6.0",
     "koa-router": "^7.4.0",
-    "koa-static": "^4.0.2",
-    "koa2-cors": "^2.0.5",
-    "moment": "^2.22.0",
+    "koa-static": "^4.0.3",
+    "koa2-cors": "^2.0.6",
+    "moment": "^2.22.2",
     "node-rsa": "^1.0.1",
-    "node-ssh": "^5.1.1",
-    "pg": "^7.4.1",
-    "pug": "^2.0.3"
+    "node-ssh": "^5.1.2",
+    "pg": "^7.4.3",
+    "pug": "^2.0.3",
+    "raintech-auth-client": "^1.0.1"
   }
 }

@@ -5,7 +5,6 @@ const https = require('https');
 const util = require('util');
 const http2 = require('http2');
 const writeFile = util.promisify(fs.writeFile);
-const config = require('../../config.js');
 
 function request(protocol, params, postData) {
     return new Promise((resolve, reject) => {
@@ -70,7 +69,7 @@ function request2(params, postData) {
     });
 }
 
-exports.request = async (url, method, postData, headers) => {
+exports.request = async ({url, method, postData, headers, useHttp2}) => {
     const params = Url.parse(url);
     params.method = method;
     params["rejectUnauthorized"] = false;
@@ -78,7 +77,7 @@ exports.request = async (url, method, postData, headers) => {
     if (params.protocol == 'https:')
         protocol = https;
     params.headers = (headers == null) ? {} : headers;
-    if (config.useHttp2)
+    if (useHttp2)
         return await request2(params, postData);
     else
         return await request(protocol, params, postData);

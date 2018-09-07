@@ -2,7 +2,7 @@ const Router = require('koa-router');
 const koaBody = require('koa-body');
 const response = require('../../middlewares/response.js');
 const db = require('../postgres/postgres.js');
-const certificate = require('../certificate/certificate.js');
+const client = require('raintech-auth-client');
 
 exports.get = async ({ connection, query = {}, rowMode = 'array' }) => {
     const params = [
@@ -36,7 +36,7 @@ exports.addController = (application, controllerName) => {
     router.post('/' + controllerName, koaBody(), async (ctx) => {
         const data = ctx.request.body;
         if (data.certificate == null) throw new response.Error({ certificate: 'certificate expected'});
-        const session = await certificate.check(data.certificate);
+        const session = await client.check(data.certificate);
         data.owner = session.userId;
         const connection = await application.pool.connect();
         try {
