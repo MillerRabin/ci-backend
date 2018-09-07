@@ -23,6 +23,7 @@ exports.get = async ({connection, query, rowMode = 'array'}) => {
     const getQuery = [
         'select * from projects',
         (where.length > 0) ? 'where ' + where.join(' and ') : '',
+        'order by project_name',
         'limit $1'
     ];
     const dbQuery = {
