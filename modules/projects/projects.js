@@ -34,6 +34,32 @@ exports.get = async ({connection, query, rowMode = 'array'}) => {
     return await connection.query(dbQuery);
 };
 
+exports.add = async ({connection, query }) => {
+    const fields = [];
+    const values = [];
+    const params = [];
+    if (query.owner != null) {
+        fields.push('owner');
+        values.push( `$${ params.push(query.owner) }`);
+    }
+    if (query.project_name != null) {
+        fields.push('project_name');
+        values.push( `$${ params.push(query.project_name) }`);
+    }
+    if (fields.length == 0) throw new response.Error({ message: 'There are no valid fields'});
+    const addQuery = [
+        `insert into projects (${ fields.join(',')})`,
+        `values ( ${ values.join(', ')})`,
+        'returning *'
+    ];
+    const dbQuery = {
+        text: addQuery.join(' '),
+        values: params,
+        rowMode: 'json'
+    };
+    return await connection.query(dbQuery);
+};
+
 exports.update = async ({ connection, query}) => {
     if (query.id == null) throw new response.Error({ id: 'id expected'});
     const params = [query.id];
@@ -86,6 +112,23 @@ exports.addController = (application, controllerName) => {
             return db.formatResponse(await exports.get({
                 connection,
                 query: sData
+            }));
+        } finally {
+            await connection.release();
+        }
+    });
+
+    router.post('/' + controllerName, koaBody(), async (ctx) => {
+        const data = ctx.request.body;
+        if (data.certificate == null) throw new response.Error({ certificate: 'certificate expected'});
+        const session = await client.check(data.certificate);
+        data.owner = session.userId;
+        delete data.certificate;
+        const connection = await application.pool.connect();
+        try {
+            return db.formatResponse(await exports.add({
+                connection,
+                query: data
             }));
         } finally {
             await connection.release();
