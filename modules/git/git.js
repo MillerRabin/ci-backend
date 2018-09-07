@@ -71,13 +71,13 @@ exports.addController = (application, controllerName) => {
                 const deployResult = dr.results;
                 const owner = (dr.project == null) ? null : dr.project.owner;
                 logData.project = dr.project;
-                await logGit({ connection, logData, deployResult, owner });
+                await logGit({ connection, data: logData, deployResult, owner });
                 setTimeout(() => {
                     if (deployResult.reload != null) deployResult.reload();
                 }, 1000);
                 return { success: true };
             } catch (e) {
-                await logGit({ connection, logData, error: e });
+                await logGit({ connection, data: logData, error: e });
                 throw e;
             }
         } finally {
@@ -111,7 +111,7 @@ exports.addController = (application, controllerName) => {
                 }, 1000);
                 return { success: true };
             } catch (e) {
-                await logGit({ connection, logData, error: e });
+                await logGit({ connection, data: logData, error: e });
                 throw e;
             }
         } finally {
