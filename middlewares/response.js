@@ -4,43 +4,28 @@ exports.Error = function (data) {
 
 require('util').inherits(exports.Error, Error);
 
-let gDefTable = {
-    'ORA-00001': { text: 'already exists' },
-    'ORA-00904': { text: 'invalid identifier', paramIndex: 1 },
-    'ORA-01400': { text: 'missing parameter' },
-    'ORA-02291': { text: 'linked object not found'},
-    'ORA-01722': { text: 'Wrong number format'}
+const gDefTable = {
+    '23505': { message: 'already exists', code: 'alreadyExists' }
 };
 
-function getOracleError(err, errTable) {
+function getPostgresError(err, errTable) {
     function getFromTable(code, message) {
-        let data = null;
-        if (errTable != null) data = errTable[code];
-        if (data == null) data = gDefTable[code];
+        const data = (errTable != null) && (errTable[code] != null) ?
+                     errTable[code] :
+                     (gDefTable[code] != null) ? gDefTable[code] : null;
+
         if (data == null) return {
             code: code,
-            text: message
+            message: message
         };
         return {
-            text: data.text,
-            paramIndex: data.paramIndex
+            code: 'alreadyExists',
+            message: data.message
         };
     }
 
-    if (err.message != null) {
-        let pArr = err.message.split(':');
-        if (pArr.length == 1) return null;
-        let code =  pArr[0];
-        let data = getFromTable(code, err.message);
-        if (data != null) {
-            if (data.paramIndex != null)
-                data.text = data.text + ' ' + pArr[data.paramIndex];
-            return data;
-        } else {
-            return { code: pArr[0], text: pArr[1] };
-        }
-    }
-    return null;
+    if (err.message == null) return null;
+    return getFromTable(err.code, err.detail);
 }
 
 exports.koa = async (ctx, next) => {
@@ -56,7 +41,7 @@ exports.koa = async (ctx, next) => {
             return;
         }
 
-        let data = getOracleError(err, null);
+        const data = getPostgresError(err, null);
         if (data != null) {
             ctx.status = 400;
             ctx.body = data;
@@ -65,7 +50,7 @@ exports.koa = async (ctx, next) => {
 
         ctx.status = err.statusCode || err.status || 500;
         ctx.body = {
-            text: err.message
+            message: err.message
         }
     }
 };

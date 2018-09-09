@@ -9,13 +9,10 @@ create table git_logs (
     event_data jsonb,
     deploy_results jsonb,
     error jsonb,
-    owner uuid not null,
+    owner uuid,
     project int
 );
 
-alter table git_logs alter column owner drop not null;
-
-alter table git_logs add column project int;
 
 create index git_logs_time on git_logs (event_time desc);
 create index git_logs_owner on git_logs (owner);
@@ -28,12 +25,12 @@ create table projects (
     project_name varchar(100) not null,
     branch varchar(100) not null default 'master',
     init jsonb,
-    deploy jsonb not null,
-    credentials jsonb not null,
+    deploy jsonb,
+    credentials jsonb,
     project_directory varchar(320) not null,
     test jsonb,
     reload jsonb,
-    owner uuid,
+    owner uuid not null,
     repository varchar(320)
 );
 

@@ -60,6 +60,24 @@ exports.add = async ({connection, query }) => {
     return await connection.query(dbQuery);
 };
 
+exports.delete = async ({connection, query }) => {
+    const where = [];
+    const params = [];
+    if (query.owner != null) where.push( `owner = $${ params.push(query.owner) }`);
+    if (query.id != null) where.push( `id = $${ params.push(query.id) }`);
+
+    if (where.length == 0) throw new response.Error({ message: 'There are no valid fields'});
+    const delQuery = [
+        'delete from projects',
+        `where ( ${ where.join(' and ')})`
+    ];
+    const dbQuery = {
+        text: delQuery.join(' '),
+        values: params
+    };
+    return await connection.query(dbQuery);
+};
+
 exports.update = async ({ connection, query}) => {
     if (query.id == null) throw new response.Error({ id: 'id expected'});
     const params = [query.id];
@@ -149,5 +167,22 @@ exports.addController = (application, controllerName) => {
             await connection.release();
         }
     });
+
+    router.delete('/' + controllerName, koaBody({ strict: false }), async (ctx) => {
+        const data = ctx.request.body;
+        if (data.id == null) throw new response.Error({ id: 'id expected'});
+        if (data.certificate == null) throw new response.Error({ certificate: 'certificate expected'});
+        const session = await client.check(data.certificate);
+        delete data.certificate;
+        data.owner = session.userId;
+
+        const connection = await application.pool.connect();
+        try {
+            return await exports.delete({connection, query: data });
+        } finally {
+            await connection.release();
+        }
+    });
+
     application.use(router.routes());
 };
