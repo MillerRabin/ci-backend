@@ -1,11 +1,16 @@
 const node_ssh = require('node-ssh');
 const response = require('../../middlewares/response.js');
 
-function getCommand(command, params) {
-    if (command.cwd != null) {
-        params.cwd = command.cwd
-    }
-    return (command.command != null) ? command.command : command;
+const cwdCommands = ['cd'];
+
+function getCommand(command) {
+    const res = { cwd: null, command: null };
+    if (command.cwd != null) res.cwd = command.cwd;
+    res.command = (command.command != null) ? command.command : command;
+    const [cmd, arg] = res.command.split(/\s+/);
+    if (cwdCommands.includes(cmd))
+        res.cwd = arg;
+    return res;
 }
 
 async function executeCommands(commands, params) {
@@ -13,9 +18,10 @@ async function executeCommands(commands, params) {
     if (commands == null)
         return { results: dres, success: false };
 
+    if (!Array.isArray(commands)) throw new response.Error({ message: `Commands must be array at configuration ${params.config.name}`});
     for (let command of commands) {
-        const execCommand = getCommand(command, params);
-        const result = await params.ssh.execCommand(execCommand, { cwd: params.cwd });
+        const execCommand = getCommand(command);
+        const result = await params.ssh.execCommand(execCommand.command, { cwd: params.cwd });
         if ((command == null) || (command == '')) continue;
         dres.push({
             command: command,
@@ -25,6 +31,7 @@ async function executeCommands(commands, params) {
             code: result.code
         });
         if (result.code != 0) return { results: dres, success: false };
+        if (execCommand.cwd != null) params.cwd = execCommand.cwd;
     }
     return { results: dres, success: true };
 }
@@ -60,7 +67,7 @@ exports.start = async (project) => {
             if ((config.name == null) || (config.name == '')) throw new response.Error({ message: 'Configuration without name is invalid'});
             if (config.credentials == null) throw new response.Error({ message: `credentials expected for configuration ${ config.name }`});
             await ssh.connect(config.credentials);
-            const cwd = config.directory + '/' + project.name;
+            const cwd = config.directory + '/' + project.project_name;
             const tres = await testRepository({ ssh, cwd, config });
             if (tres.success) {
                 const dres = await deploy({ ssh, cwd, config });
