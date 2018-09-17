@@ -24,19 +24,25 @@ create table projects (
     update_time timestamp with time zone not null default now(),
     project_name varchar(100) not null,
     branch varchar(100) not null default 'master',
-    init jsonb,
-    deploy jsonb,
-    credentials jsonb,
+    init jsonb not null default '{}',
+    deploy jsonb not null default '{}',
+    credentials jsonb not null default '{}',
     project_directory varchar(320) not null,
-    test jsonb,
-    reload jsonb,
+    directory jsonb not null default '{}',
+    test jsonb not null default '{}',
+    reload jsonb not null default '{}',
+    server_credentials jsonb not null default '{}',
     owner uuid not null,
-    repository varchar(320)
+    repository varchar(320),
+    project_data jsonb not null default '{}'
 );
 
 create unique index projects_name_index on projects (project_name, owner);
 
-alter table projects add column repository varchar(320);
+alter table projects rename column project_data3 to project_data2;
+
+update projects set project_data = jsonb_strip_nulls(project_data) where id = 19;
+
 
 select * from git_logs order by event_time desc;
 
@@ -61,8 +67,6 @@ values ('auth-frontend', 'production',
 '[ "cd /usr/auth/auth-frontend" ]',
 null
 )
-
-update projects set deploy = '["git clean -fd", "git reset --hard HEAD", "git pull origin production", "npm install"]' where project_name = 'ci-backend';
 
 
 select * from git_logs order by event_time desc limit 100 offset 0;

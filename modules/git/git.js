@@ -17,8 +17,8 @@ function copyError(error) {
 async function logGit(pobj) {
     const addQuery = 'insert into git_logs (event_data, deploy_results, error, owner) values($1, $2, $3, $4)';
     const params = [
-        pobj.data,
-        (pobj.deployResult == null) ? null : pobj.deployResult,
+        JSON.stringify(pobj.data),
+        (pobj.deployResult == null) ? null : JSON.stringify(pobj.deployResult),
         (pobj.error == null) ? null : copyError(pobj.error),
         pobj.owner
     ];
@@ -109,7 +109,7 @@ exports.addController = (application, controllerName) => {
                 setTimeout(() => {
                     if (deployResult.reload != null) deployResult.reload();
                 }, 1000);
-                return { success: true };
+                return { success: true, message: 'Execute successful' };
             } catch (e) {
                 await logGit({ connection, data: logData, error: e });
                 throw e;

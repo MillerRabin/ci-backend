@@ -1,4 +1,5 @@
 const node_ssh = require('node-ssh');
+const response = require('../../middlewares/response.js');
 
 function getCommand(command, params) {
     if (command.cwd != null) {
@@ -29,34 +30,48 @@ async function executeCommands(commands, params) {
 }
 
 async function deploy(params) {
-    return await executeCommands(params.projectData.deploy, params)
+    return await executeCommands(params.config.deploy, params)
 }
 
 async function testRepository(params) {
-    return await executeCommands(params.projectData.test, params);
+    return await executeCommands(params.config.test, params);
 }
 
 async function initRepository(params) {
-    return await executeCommands(params.projectData.init, params);
+    return await executeCommands(params.config.init, params);
 }
 
 async function reload(params) {
-    return await executeCommands(params.projectData.reload, params);
+    return await executeCommands(params.config.reload, params);
 }
 
-exports.start = async (projectData) => {
+exports.start = async (project) => {
     async function ireload() {
-        return await reload({ ssh, cwd, projectData });
+        return await reload({ ssh, cwd, project });
     }
-    const ssh = new node_ssh();
-    await ssh.connect(projectData.credentials);
-    const cwd = projectData.project_directory + '/' + projectData.project_name;
-    const tres = await testRepository({ ssh, cwd, projectData });
-    if (tres.success) {
-        const dres = await deploy({ ssh, cwd, projectData });
-        return { test: tres, deploy: dres, reload: ireload };
-    } else {
-        const ires = await initRepository({ ssh, cwd, projectData });
-        return { test: tres, init: ires, reload: ireload };
+    const projectData = project.project_data;
+    const res = [];
+    if (projectData == null) throw new response.Error({ message: 'project_data is null'});
+    if (!Array.isArray(projectData)) throw new response.Error({ message: 'project_data must be array of configurations'});
+
+    for (let config of projectData) {
+        const ssh = new node_ssh();
+        try {
+            if ((config.name == null) || (config.name == '')) throw new response.Error({ message: 'Configuration without name is invalid'});
+            if (config.credentials == null) throw new response.Error({ message: `credentials expected for configuration ${ config.name }`});
+            await ssh.connect(config.credentials);
+            const cwd = config.directory + '/' + project.name;
+            const tres = await testRepository({ ssh, cwd, config });
+            if (tres.success) {
+                const dres = await deploy({ ssh, cwd, config });
+                res.push({ test: tres, deploy: dres, reload: ireload, name: config.name });
+            } else {
+                const ires = await initRepository({ ssh, cwd, config });
+                res.push({ test: tres, init: ires, reload: ireload, name: config.name });
+            }
+        } finally {
+            ssh.dispose();
+        }
     }
+    return res;
 };
