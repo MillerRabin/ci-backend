@@ -24,14 +24,6 @@ create table projects (
     update_time timestamp with time zone not null default now(),
     project_name varchar(100) not null,
     branch varchar(100) not null default 'master',
-    init jsonb not null default '{}',
-    deploy jsonb not null default '{}',
-    credentials jsonb not null default '{}',
-    project_directory varchar(320) not null,
-    directory jsonb not null default '{}',
-    test jsonb not null default '{}',
-    reload jsonb not null default '{}',
-    server_credentials jsonb not null default '{}',
     owner uuid not null,
     repository varchar(320),
     project_data jsonb not null default '{}'
@@ -39,9 +31,6 @@ create table projects (
 
 create unique index projects_name_index on projects (project_name, owner);
 
-alter table projects rename column project_data3 to project_data2;
-
-update projects set project_data = jsonb_strip_nulls(project_data) where id = 19;
 
 
 select * from git_logs order by event_time desc;
