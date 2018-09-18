@@ -67,7 +67,7 @@ exports.start = async (project) => {
             if ((config.name == null) || (config.name == '')) throw new response.Error({ message: 'Configuration without name is invalid'});
             if (config.credentials == null) throw new response.Error({ message: `credentials expected for configuration ${ config.name }`});
             await ssh.connect(config.credentials);
-            const cwd = config.directory + '/' + project.project_name;
+            const cwd = config.directory;
             const tres = await testRepository({ ssh, cwd, config });
             if (tres.success) {
                 const dres = await deploy({ ssh, cwd, config });

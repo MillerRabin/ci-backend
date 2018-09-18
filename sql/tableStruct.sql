@@ -72,3 +72,5 @@ update git_logs set owner = 'c6302b79-aec3-4e09-b72d-a2d4d415eec8';
 update projects set deploy = '["git clean -fd", "git reset --hard HEAD", "git pull origin production", "npm install", { "cwd": "/usr/raintech/ci/ci-frontend/builder", "command": "npm install" }, "node main.js"]' where project_name = 'ci-frontend';
 
 select * from projects;
+
+truncate table git_logs;
