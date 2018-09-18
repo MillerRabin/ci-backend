@@ -53,8 +53,13 @@ async function reload(params) {
 }
 
 exports.start = async (project) => {
-    async function ireload() {
-        return await reload({ ssh, cwd, project });
+    async function cReload(config, project) {
+        const ssh = new node_ssh();
+        await ssh.connect(config.credentials);
+        const cwd = config.directory;
+        return async function ireload() {
+            return await reload({ config, ssh, cwd, project });
+        }
     }
     const projectData = project.project_data;
     const res = [];
@@ -71,10 +76,10 @@ exports.start = async (project) => {
             const tres = await testRepository({ ssh, cwd, config });
             if (tres.success) {
                 const dres = await deploy({ ssh, cwd, config });
-                res.push({ test: tres, deploy: dres, reload: ireload, name: config.name });
+                res.push({ test: tres, deploy: dres, reload: await cReload(config), name: config.name });
             } else {
                 const ires = await initRepository({ ssh, cwd, config });
-                res.push({ test: tres, init: ires, reload: ireload, name: config.name });
+                res.push({ test: tres, init: ires, reload: await cReload(config), name: config.name });
             }
         } finally {
             ssh.dispose();

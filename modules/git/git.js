@@ -15,14 +15,19 @@ function copyError(error) {
 }
 
 async function logGit(pobj) {
-    const addQuery = 'insert into git_logs (event_data, deploy_results, error, owner) values($1, $2, $3, $4)';
-    const params = [
-        JSON.stringify(pobj.data),
-        (pobj.deployResult == null) ? null : JSON.stringify(pobj.deployResult),
-        (pobj.error == null) ? null : copyError(pobj.error),
-        pobj.owner
-    ];
-    return await pobj.connection.query(addQuery, params);
+    const connection = await pobj.application.pool.connect();
+    try {
+        const addQuery = 'insert into git_logs (event_data, deploy_results, error, owner) values($1, $2, $3, $4)';
+        const params = [
+            JSON.stringify(pobj.data),
+            (pobj.deployResult == null) ? null : JSON.stringify(pobj.deployResult),
+            (pobj.error == null) ? null : copyError(pobj.error),
+            pobj.owner
+        ];
+        return await connection.query(addQuery, params);
+    } finally {
+        await connection.release();
+    }
 }
 
 function parseBitbucketStructure(data) {
@@ -58,8 +63,21 @@ async function deployProjectBitbucket(connection, data) {
     return await deployProject(connection, obj);
 }
 
+
 exports.addController = (application, controllerName) => {
     const router = new Router();
+
+    async function processResults(dr, logData) {
+        const deployResult = dr.results;
+        const owner = (dr.project == null) ? null : dr.project.owner;
+        logData.project = dr.project;
+        setTimeout(async () => {
+            for (let dr of deployResult) {
+                if (dr.reload != null) dr.reload = await dr.reload();
+            }
+            await logGit({ application, data: logData, deployResult, owner });
+        }, 1000);
+    }
 
     router.post('/' + controllerName + '/bitbucket', koaBody(), async (ctx) => {
         const data = ctx.request.body;
@@ -68,16 +86,10 @@ exports.addController = (application, controllerName) => {
         try {
             try {
                 const dr = await deployProjectBitbucket(connection, data);
-                const deployResult = dr.results;
-                const owner = (dr.project == null) ? null : dr.project.owner;
-                logData.project = dr.project;
-                await logGit({ connection, data: logData, deployResult, owner });
-                setTimeout(() => {
-                    if (deployResult.reload != null) deployResult.reload();
-                }, 1000);
+                await processResults(dr);
                 return { success: true };
             } catch (e) {
-                await logGit({ connection, data: logData, error: e });
+                await logGit({ application, data: logData, error: e });
                 throw e;
             }
         } finally {
@@ -99,19 +111,10 @@ exports.addController = (application, controllerName) => {
                     id: data.id,
                     owner: session.userId
                 });
-                const deployResult = dr.results;
-                const owner = (dr.project == null) ? null : dr.project.owner;
-                logData.project = dr.project;
-                await logGit({
-                    connection,
-                    data: logData,
-                    deployResult, owner });
-                setTimeout(() => {
-                    if (deployResult.reload != null) deployResult.reload();
-                }, 1000);
+                await processResults(dr, logData);
                 return { success: true, message: 'Execute successful' };
             } catch (e) {
-                await logGit({ connection, data: logData, error: e });
+                await logGit({ application, data: logData, error: e });
                 throw e;
             }
         } finally {
