@@ -16,7 +16,7 @@ function getCommand(command) {
 async function executeCommands(commands, params) {
     const dres = [];
     if (commands == null)
-        return { results: dres, success: false };
+        return { results: dres, success: true };
 
     if (!Array.isArray(commands)) throw new response.Error({ message: `Commands must be array at configuration ${params.config.name}`});
     for (let command of commands) {
