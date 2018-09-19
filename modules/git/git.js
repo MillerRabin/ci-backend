@@ -86,7 +86,7 @@ exports.addController = (application, controllerName) => {
         try {
             try {
                 const dr = await deployProjectBitbucket(connection, data);
-                await processResults(dr);
+                await processResults(dr, logData);
                 return { success: true };
             } catch (e) {
                 await logGit({ application, data: logData, error: e });
