@@ -90,6 +90,7 @@ exports.update = async ({ connection, query}) => {
     if (query.project_name != null) uQuery.push(`project_name = $${ params.push(query.project_name) }`);
     if (query.branch != null) uQuery.push(`branch = $${ params.push(query.branch) }`);
     if (query.project_data != null) uQuery.push(`project_data = $${ params.push(JSON.stringify(query.project_data)) }`);
+    uQuery.push('update_time = now()');
 
     const dbQuery = {
         text: `update projects set ${ uQuery.join(', ')} where ${ where.join(' and ')}`,
