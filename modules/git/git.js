@@ -69,12 +69,11 @@ exports.addController = (application, controllerName) => {
 
     async function processResults(dr, logData) {
         const deployResult = dr.results;
+        console.log(deployResult);
         const owner = (dr.project == null) ? null : dr.project.owner;
         logData.project = dr.project;
         setTimeout(async () => {
-            console.log('git reload');
             for (let dr of deployResult) {
-                console.log(dr);
                 if (dr.reload != null) dr.reload = await dr.reload();
             }
             await logGit({ application, data: logData, deployResult, owner });
