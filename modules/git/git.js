@@ -48,6 +48,18 @@ function parseBitbucketStructure(data) {
     return { project: projectName, branch: branchName };
 }
 
+function parseGitLabStructure(data) {
+    const repository = data.repository;
+    if (repository == null) throw new response.Error({ repository: 'Invalid repository'});
+    const projectName = repository.name;
+    if (projectName == null) throw new response.Error({ project: 'Invalid project name'});
+    const ref = data.ref;
+    if (typeof(ref) != 'string') throw new response.Error({ ref: 'Ref must be string'});
+    const refs = ref.split('/');
+    const branchName = refs[refs.length - 1];
+    return { project: projectName, branch: branchName };
+}
+
 async function deployProject(connection, data) {
     const pdata = await projects.getProject(connection, data);
     if (pdata == null) return { results: { text: 'No project to deploy' }};
@@ -60,6 +72,12 @@ async function deployProject(connection, data) {
 async function deployProjectBitbucket(connection, data) {
     const obj = parseBitbucketStructure(data);
     if (obj == null) return { results: { text: 'Can`t get information from bitbucket structure' }};
+    return await deployProject(connection, obj);
+}
+
+async function deployProjectGitLab(connection, data) {
+    const obj = parseGitLabStructure(data);
+    if (obj == null) return { results: { text: 'Can`t get information from gitlab structure' }};
     return await deployProject(connection, obj);
 }
 
@@ -106,7 +124,7 @@ exports.addController = (application, controllerName) => {
         const logData = { request: data };
         try {
             try {
-                const dr = await deployProjectBitbucket(connection, data);
+                const dr = await deployProjectGitLab(connection, data);
                 await processResults(dr, logData);
                 return { success: true };
             } catch (e) {
