@@ -69,13 +69,12 @@ exports.addController = (application, controllerName) => {
 
     async function processResults(dr, logData) {
         const deployResult = dr.results;
-        console.log('test');
-        console.log(deployResult);
         const owner = (dr.project == null) ? null : dr.project.owner;
         logData.project = dr.project;
         setTimeout(async () => {
-            for (let dr of deployResult) {
-                if (dr.reload != null) dr.reload = await dr.reload();
+            if (Array.isArray(deployResult)) {
+                for (let dr of deployResult)
+                    if (dr.reload != null) dr.reload = await dr.reload();
             }
             await logGit({ application, data: logData, deployResult, owner });
         }, 1000);
