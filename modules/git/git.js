@@ -62,7 +62,7 @@ function parseGitLabStructure(data) {
 
 async function deployProject(connection, data) {
     const pdata = await projects.getProject(connection, data);
-    if (pdata == null) return { results: { text: 'No project to deploy' }};
+    if (pdata == null) return { results: { text: 'No project to deploy', data: data }};
     return {
         project: pdata,
         results: await deploy.start(pdata)
