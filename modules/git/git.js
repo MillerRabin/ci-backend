@@ -74,6 +74,7 @@ exports.addController = (application, controllerName) => {
         setTimeout(async () => {
             console.log('git reload');
             for (let dr of deployResult) {
+                console.log(dr);
                 if (dr.reload != null) dr.reload = await dr.reload();
             }
             await logGit({ application, data: logData, deployResult, owner });
