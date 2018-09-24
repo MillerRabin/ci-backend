@@ -69,6 +69,7 @@ exports.addController = (application, controllerName) => {
 
     async function processResults(dr, logData) {
         const deployResult = dr.results;
+        console.log('test');
         console.log(deployResult);
         const owner = (dr.project == null) ? null : dr.project.owner;
         logData.project = dr.project;
