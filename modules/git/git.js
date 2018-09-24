@@ -90,7 +90,6 @@ exports.addController = (application, controllerName) => {
         const owner = (dr.project == null) ? null : dr.project.owner;
         logData.project = dr.project;
         setTimeout(async () => {
-            console.log(deployResult);
             if (Array.isArray(deployResult)) {
                 for (let dr of deployResult)
                     if (dr.reload != null) dr.reload = await dr.reload();
@@ -119,7 +118,6 @@ exports.addController = (application, controllerName) => {
 
     router.post('/' + controllerName + '/gitlab', koaBody(), async (ctx) => {
         const data = ctx.request.body;
-        console.log(data);
         const connection = await application.pool.connect();
         const logData = { request: data };
         try {
