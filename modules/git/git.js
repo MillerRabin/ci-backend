@@ -97,6 +97,24 @@ exports.addController = (application, controllerName) => {
         }
     });
 
+    router.post('/' + controllerName + '/gitlab', koaBody(), async (ctx) => {
+        const data = ctx.request.body;
+        const connection = await application.pool.connect();
+        const logData = { request: data };
+        try {
+            try {
+                const dr = await deployProjectBitbucket(connection, data);
+                await processResults(dr, logData);
+                return { success: true };
+            } catch (e) {
+                await logGit({ application, data: logData, error: e });
+                throw e;
+            }
+        } finally {
+            await connection.release();
+        }
+    });
+
     router.post('/' + controllerName + '/manual', koaBody(), async (ctx) => {
         const data = ctx.request.body;
         if (data.certificate == null) throw new response.Error({ message: 'certificate expected'});
