@@ -100,6 +100,7 @@ exports.addController = (application, controllerName) => {
 
     router.post('/' + controllerName + '/gitlab', koaBody(), async (ctx) => {
         const data = ctx.request.body;
+        console.log(data);
         const connection = await application.pool.connect();
         const logData = { request: data };
         try {
