@@ -4,6 +4,8 @@
   "description": "Backend part of Raintech CI Project",
   "main": "main.js",
   "scripts": {
+    "debug": "node main.js debug",
+    "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -1,8 +1,7 @@
 create database ci;
 create user master;
 grant all on database ci to master;
-alter user master password 'ifyouwanttohave';
-alter user postgres password 'ifyouwanttohave';
+alter user master password 'your-password-here';
 
 create table git_logs (
     event_time timestamp with time zone not null default now(),
