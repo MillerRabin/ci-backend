@@ -12,7 +12,6 @@ create table git_logs (
     project int
 );
 
-
 create index git_logs_time on git_logs (event_time desc);
 create index git_logs_owner on git_logs (owner);
 

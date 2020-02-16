@@ -1,6 +1,6 @@
 {
   "name": "ci-backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Backend part of Raintech CI Project",
   "main": "main.js",
   "scripts": {
@@ -10,11 +10,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://millerrabin@bitbucket.org/raintechteam/ci-backend.git"
+    "url": "git+https://github.com/MillerRabin/ci-backend.git"
   },
   "author": "millerrabin",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/raintechteam/ci-backend#readme",
+  "homepage": "https://github.com/MillerRabin/ci-backend",
   "dependencies": {
     "koa": "^2.5.2",
     "koa-body": "^2.6.0",

@@ -1,6 +1,8 @@
-#Backend part of Raintech CI
+# Backend part of Raintech CI
+The Backend path of Raintech Continuous Integration tool based on the Intention Network
 
-##Install
+
+## Install
 1. Clone project
 2. You need to prepare database cluster. Use Postgres version >= 10, and setup user access for it.   
 3. Install dependencies
