@@ -21,7 +21,7 @@
     "koa-router": "^7.4.0",
     "koa-static": "^4.0.3",
     "koa2-cors": "^2.0.6",
-    "moment": "^2.22.2",
+    "moment": "^2.29.4",
     "node-rsa": "^1.0.1",
     "node-ssh": "^5.1.2",
     "pg": "^7.4.3",
